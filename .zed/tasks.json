@@ -1,0 +1,14 @@
+// Project tasks configuration. See https://zed.dev/docs/tasks for documentation.
+//
+// Example:
+[
+  {
+    "label": "Run Maeven With DEPs",
+    "command": "cd ~/Desktop/cli; mvn clean package; mvn dependency:copy-dependencies -DoutputDirectory=target/libs; java -cp 'target/CLI-1.0-SNAPSHOT.jar:target/libs/*' type.api.CLI.Application"
+  },
+
+  {
+    "label": "Run API",
+    "command": "cd ~/Desktop/movie; ./mvnw clean install; ./mvnw spring-boot:run"
+  }
+]
