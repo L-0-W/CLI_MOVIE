@@ -3,9 +3,7 @@ package type.api.CLI.WIDGETS;
 import java.io.IOException;
 import java.util.List;
 import org.jline.terminal.Terminal;
-import org.jline.utils.Log;
 import org.jline.utils.NonBlockingReader;
-import type.api.CLI.GUI;
 import type.api.CLI.WIDGETS.JSON_OBJECTS.BOOK;
 
 public class INPUT {
@@ -30,10 +28,9 @@ public class INPUT {
         return this;
     }
 
-    public List<BOOK> draw(CLIENT client) throws Exception {
-        NonBlockingReader reader = terminal.reader();
-
+    public void handleKeyEvents(CLIENT client) throws Exception {
         try {
+            NonBlockingReader reader = terminal.reader();
             int indexInput = charsLength + 1;
             int c = reader.read(60);
 
@@ -50,7 +47,7 @@ public class INPUT {
                         "http://localhost:8080/books?title=" + text
                     );
 
-                    return response;
+                    System.out.println(response != null);
                 }
 
                 if (
@@ -75,44 +72,48 @@ public class INPUT {
                     cursorLine--;
                 }
             }
-
-            long tempoAtual = System.currentTimeMillis();
-            if ((tempoAtual - tempoInicial) / 1000 >= 1) {
-                input.deleteCharAt(cursorLine);
-                input.insert(cursorLine, ' ');
-
-                tempoInicial = System.currentTimeMillis();
-            } else {
-                input.deleteCharAt(cursorLine);
-                input.insert(cursorLine, '|');
-            }
-
-            String[] str = {
-                "┌" + "─".repeat(searchBarSize) + "┐",
-                "│" + input.toString() + "│",
-                "└" + "─".repeat(searchBarSize) + "┘",
-            };
-
-            int index = 0;
-            for (String line : str) {
-                terminal
-                    .writer()
-                    .print(
-                        String.format(
-                            "\033[%d;%dH%s",
-                            ((terminal.getHeight() - terminal.getHeight()) +
-                                    3) +
-                                index,
-                            ((terminal.getWidth() - line.length()) / 2),
-                            line
-                        )
-                    );
-                index++;
-            }
         } catch (IOException e) {
-            Log.error(e);
+            e.printStackTrace();
+        }
+    }
+
+    public void draw() throws Exception {
+        long tempoAtual = System.currentTimeMillis();
+        if ((tempoAtual - tempoInicial) / 1000 >= 1) {
+            input.deleteCharAt(cursorLine);
+            input.insert(cursorLine, ' ');
+
+            tempoInicial = System.currentTimeMillis();
+        } else {
+            input.deleteCharAt(cursorLine);
+            input.insert(cursorLine, '|');
         }
 
-        return null;
+        String[] str = {
+            "┌" + "─".repeat(searchBarSize) + "┐",
+            "│" + input.toString() + "│",
+            "└" + "─".repeat(searchBarSize) + "┘",
+        };
+
+        int index = 0;
+        for (String line : str) {
+            terminal
+                .writer()
+                .print(
+                    String.format(
+                        "\033[%d;%dH%s",
+                        ((terminal.getHeight() - terminal.getHeight()) + 3) +
+                            index,
+                        ((terminal.getWidth() - line.length()) / 2),
+                        line
+                    )
+                );
+            index++;
+        }
+    }
+
+    public void init(CLIENT client, List<BOOK> response_book) throws Exception {
+        this.handleKeyEvents(client);
+        this.draw();
     }
 }

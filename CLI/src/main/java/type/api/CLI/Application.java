@@ -34,10 +34,10 @@ public class Application {
                 terminal.puts(Capability.clear_screen);
                 terminal.puts(Capability.cursor_invisible);
 
-                List<BOOK> response = input.draw(client);
-                if (response != null) {
-                    table.draw(response);
-                }
+                List<BOOK> response_book = null;
+
+                input.init(client, response_book);
+                table.init().elements_draw(response_book);
 
                 terminal.writer().flush();
             }

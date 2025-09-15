@@ -26,7 +26,7 @@ public class TABLE {
         return this;
     }
 
-    public void draw(List<BOOK> movie) {
+    public void draw() {
         List<String> str = new ArrayList<>();
 
         for (int i = 0; i < tableHeigthSize; i++) {
@@ -91,5 +91,15 @@ public class TABLE {
                 );
             index++;
         }
+    }
+
+    public void elements_draw(List<BOOK> books_draw) {
+        return;
+    }
+
+    public TABLE init() {
+        this.draw();
+
+        return this;
     }
 }
