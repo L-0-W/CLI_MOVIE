@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import type.api.API.book.RETURNS;
+import type.api.API.book.RETURNS_CODES;
 import type.api.API.book.dados.model.BOOK;
 import type.api.API.book.logica.service.bookService;
 
@@ -30,12 +32,13 @@ public class bookController {
         @RequestParam String title,
         HttpServletResponse response
     ) throws IOException, SQLException {
-        ArrayList<BOOK> bookArrayList = bookService.getBookByTitle(title);
+        RETURNS<ArrayList<BOOK>> bookArrayList = bookService.getBookByTitle(
+            title
+        );
 
-        if (bookArrayList != null) {
-            response.setStatus(200);
-            return bookArrayList;
-        } else {
+        if (bookArrayList.GET_RETURN_CODE() != RETURNS_CODES.ALL_OK) {
+            System.out.println(bookArrayList.GET_RETURN_MESSAGE());
+
             response.setStatus(400);
 
             ArrayList<BOOK> empty_return = new ArrayList<>();
@@ -45,6 +48,9 @@ public class bookController {
 
             return empty_return;
         }
+
+        response.setStatus(RETURNS_CODES.ALL_OK);
+        return bookArrayList.GET_RETURN_DATA();
     }
 
     /*

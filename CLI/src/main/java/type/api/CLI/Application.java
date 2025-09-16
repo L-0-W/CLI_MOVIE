@@ -1,6 +1,7 @@
 package type.api.CLI;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
@@ -28,16 +29,22 @@ public class Application {
                 .setTerminal(terminal);
 
             var client = GUI.CLIENT_BUILDER();
+            List<BOOK> response_book = new ArrayList<>();
 
             while (true) {
                 // change for - while(gui.open())
                 terminal.puts(Capability.clear_screen);
                 terminal.puts(Capability.cursor_invisible);
 
-                List<BOOK> response_book = null;
-
                 input.init(client, response_book);
-                table.init().elements_draw(response_book);
+
+                if (!response_book.isEmpty()) {
+                    table.use_elements(response_book);
+                } else {
+                    table.clean_elements();
+                }
+
+                table.init();
 
                 terminal.writer().flush();
             }

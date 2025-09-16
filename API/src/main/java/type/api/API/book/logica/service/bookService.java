@@ -4,6 +4,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import type.api.API.book.RETURNS;
+import type.api.API.book.RETURNS_CODES;
+import type.api.API.book.RETURNS_MESSAGE;
 import type.api.API.book.dados.model.BOOK;
 import type.api.API.book.dados.repository.queryController;
 
@@ -13,7 +16,8 @@ public class bookService {
     @Autowired
     private queryController queryController;
 
-    public ArrayList<BOOK> getBookByTitle(String str) throws SQLException {
+    public RETURNS<ArrayList<BOOK>> getBookByTitle(String str)
+        throws SQLException {
         if (str != null) {
             System.out.println(str);
             String[] campos = { "*" };
@@ -34,13 +38,23 @@ public class bookService {
             ArrayList<BOOK> bookArrayList = queryController
                 .select(campos)
                 .from("books")
-                .where("title == " + str)
+                .where("title")
+                .like_start(str)
                 .runQuery();
 
-            return bookArrayList;
+            RETURNS<ArrayList<BOOK>> returns = new RETURNS<>(
+                bookArrayList,
+                RETURNS_MESSAGE.ALL_OK,
+                RETURNS_CODES.ALL_OK
+            );
+            return returns;
         } else {
-            // FAZER MELHOR RETORNO DE ERRO COM INTERFACE
-            return null;
+            RETURNS<ArrayList<BOOK>> returns = new RETURNS<>(
+                null,
+                RETURNS_MESSAGE.PARAM_IS_EMPTY,
+                RETURNS_CODES.PARAM_IS_EMPTY
+            );
+            return returns;
         }
     }
 }

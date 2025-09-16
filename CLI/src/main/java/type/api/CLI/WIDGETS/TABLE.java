@@ -2,6 +2,7 @@ package type.api.CLI.WIDGETS;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.jline.terminal.Terminal;
 import type.api.CLI.WIDGETS.JSON_OBJECTS.BOOK;
 
@@ -10,6 +11,7 @@ public class TABLE {
     protected int tableWidthSize = 10;
     protected int tableHeigthSize = 10;
     protected Terminal terminal;
+    protected List<BOOK> elements_draw = new ArrayList<>();
 
     public TABLE setTerminal(Terminal terminal) {
         this.terminal = terminal;
@@ -34,45 +36,43 @@ public class TABLE {
                 str.add("┌" + "─".repeat(tableWidthSize) + "┐");
             } else if (i == (tableHeigthSize - 1)) {
                 str.add("└" + "─".repeat(tableWidthSize) + "┘");
-            } else {
-                if (i == 1) {
-                    str.add(
+            } else if (i == 1) {
+                str.add(
+                    "│" +
+                        " " +
+                        "Book Name" +
+                        " ".repeat(5) +
                         "│" +
-                            " " +
-                            "Book Name" +
-                            " ".repeat(5) +
-                            "│" +
-                            " ".repeat(5) +
-                            "Book Id" +
-                            " ".repeat(((tableWidthSize - 1) - (20 + 7))) +
-                            "│"
-                    );
+                        " ".repeat(5) +
+                        "Book Id" +
+                        " ".repeat(((tableWidthSize - 1) - (20 + 7))) +
+                        "│"
+                );
 
-                    str.add("│" + "─".repeat(tableWidthSize) + "│");
-                } else {
-                    if (!movie.isEmpty()) {
-                        var element = movie.remove(0);
-                        str.add(
-                            "│" +
-                                " " +
-                                element.getTitle() +
-                                " ".repeat(5) +
-                                "│" +
-                                " ".repeat(5) +
-                                element.getBook_Id() +
-                                " ".repeat(
-                                    ((tableWidthSize - 1) -
-                                        element.getTitle().length() -
-                                        13)
-                                ) +
-                                "│"
-                        );
+                str.add("│" + "─".repeat(tableWidthSize) + "│");
+            } else if (
+                !elements_draw.isEmpty() &&
+                elements_draw.size() >= (i - 1) &&
+                elements_draw.get(0).getAuthorsName() != null
+            ) {
+                var current_element = elements_draw.get(i - 2);
+                str.add(
+                    "│" +
+                        " ".repeat(5) +
+                        current_element.getTitle() +
+                        " ".repeat(5) +
+                        "│" +
+                        " ".repeat(
+                            tableWidthSize -
+                                (current_element.getTitle().length()) -
+                                11
+                        ) +
+                        "│"
+                );
 
-                        str.add("│" + "─".repeat(tableWidthSize) + "│");
-                    } else {
-                        str.add("│" + " ".repeat(tableWidthSize) + "│");
-                    }
-                }
+                str.add("│" + "─".repeat(tableWidthSize) + "│");
+            } else {
+                str.add("│" + " ".repeat(tableWidthSize) + "│");
             }
         }
 
@@ -93,13 +93,21 @@ public class TABLE {
         }
     }
 
-    public void elements_draw(List<BOOK> books_draw) {
-        return;
+    public void use_elements(List<BOOK> books_draw) {
+        this.elements_draw.removeAll(this.elements_draw);
+        this.elements_draw.addAll(books_draw);
+    }
+
+    public void clean_elements() {
+        this.elements_draw.removeAll(this.elements_draw);
+    }
+
+    public List<BOOK> get_elements() {
+        return this.elements_draw;
     }
 
     public TABLE init() {
         this.draw();
-
         return this;
     }
 }

@@ -28,7 +28,8 @@ public class INPUT {
         return this;
     }
 
-    public void handleKeyEvents(CLIENT client) throws Exception {
+    public void handleKeyEvents(CLIENT client, List<BOOK> response_book)
+        throws Exception {
         try {
             NonBlockingReader reader = terminal.reader();
             int indexInput = charsLength + 1;
@@ -41,13 +42,7 @@ public class INPUT {
                 var chr = (char) c;
 
                 if (c == 13) {
-                    var text = input.toString().trim().replace("|", "");
-
-                    List<BOOK> response = client.GET_REQUEST(
-                        "http://localhost:8080/books?title=" + text
-                    );
-
-                    System.out.println(response != null);
+                    return;
                 }
 
                 if (
@@ -71,6 +66,19 @@ public class INPUT {
                     input.insert(cursorLine, ' ');
                     cursorLine--;
                 }
+
+                var text = input.toString().trim().replace("|", "");
+                response_book.removeAll(response_book);
+
+                List<BOOK> response = client.GET_REQUEST(
+                    "http://localhost:8080/books?title=" + text
+                );
+
+                if (text.isBlank()) {
+                    return;
+                }
+
+                response_book.addAll(response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,6 +98,8 @@ public class INPUT {
         }
 
         String[] str = {
+            "http://localhost:8080/books?title=" +
+            input.toString().trim().replace("|", ""),
             "┌" + "─".repeat(searchBarSize) + "┐",
             "│" + input.toString() + "│",
             "└" + "─".repeat(searchBarSize) + "┘",
@@ -113,7 +123,7 @@ public class INPUT {
     }
 
     public void init(CLIENT client, List<BOOK> response_book) throws Exception {
-        this.handleKeyEvents(client);
+        this.handleKeyEvents(client, response_book);
         this.draw();
     }
 }

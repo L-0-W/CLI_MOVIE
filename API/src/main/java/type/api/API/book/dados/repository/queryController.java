@@ -78,12 +78,34 @@ public class queryController {
     }
 
     public queryController where(String param) {
+        if (param.length() <= 0) {
+            System.out.println("Parametro Vazio");
+        }
+
         query.append(" where " + param);
+        return this;
+    }
+
+    public queryController equals(String value) {
+        query.append(" == " + value);
+        return this;
+    }
+
+    public queryController like_start(String value) {
+        StringBuilder str = new StringBuilder();
+
+        str.append("'");
+        str.append(value + "%");
+        str.append("'");
+
+        query.append(" like " + str.toString());
         return this;
     }
 
     public ArrayList<BOOK> runQuery() {
         query.append(";");
+
+        System.out.println(query);
 
         try (
             Connection connection = DriverManager.getConnection(
