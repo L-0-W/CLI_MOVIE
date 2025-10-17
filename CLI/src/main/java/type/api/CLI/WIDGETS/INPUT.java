@@ -1,10 +1,11 @@
 package type.api.CLI.WIDGETS;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
-import type.api.CLI.WIDGETS.JSON_OBJECTS.BOOK;
 
 public class INPUT {
 
@@ -13,6 +14,10 @@ public class INPUT {
     protected Terminal terminal;
     protected int charsLength = 0;
     protected int cursorLine = 1;
+
+    public String pesquisar_por = "Frase";
+    public int selected = 0;
+
     long tempoInicial = System.currentTimeMillis();
 
     public INPUT setSearchBarSize(int searchBarSize) {
@@ -28,10 +33,11 @@ public class INPUT {
         return this;
     }
 
-    public void handleKeyEvents(CLIENT client, List<BOOK> response_book)
+    public void handleKeyEvents(CLIENT client, List<JsonNode> response_book)
         throws Exception {
         try {
             NonBlockingReader reader = terminal.reader();
+
             int indexInput = charsLength + 1;
             int c = reader.read(60);
 
@@ -42,6 +48,53 @@ public class INPUT {
                 var chr = (char) c;
 
                 if (c == 13) {
+                    response_book.removeAll(response_book);
+
+                    var trimInput = input.toString().trim();
+                    if (trimInput.length() >= 10) {
+                        var text = String.join(
+                            "+",
+                            input.toString().replace("|", "").split(" ")
+                        );
+
+                        if (text.isBlank()) {
+                            return;
+                        }
+
+                        Optional<JsonNode> response = client.GET_REQUEST(
+                            "https://openlibrary.org/search.json?q=" + text
+                        );
+
+                        if (response.isPresent()) {
+                            response_book.add(response.get());
+                        } else {
+                            return;
+                        }
+                    }
+
+                    return;
+                }
+
+                if (c == 27) {
+                    int next = reader.read(100);
+
+                    if (next == 91) {
+                        int last = reader.read(100);
+                        if (last == 67) {
+                            this.pesquisar_por = "Palavra";
+                            return;
+                        } else if (last == 68) {
+                            this.pesquisar_por = "Frase";
+                            return;
+                        } else if (last == 66) {
+                            this.selected++;
+                            return;
+                        }
+                    }
+                }
+
+                if (c == 40) {
+                    this.pesquisar_por = "Palavra";
                     return;
                 }
 
@@ -66,19 +119,6 @@ public class INPUT {
                     input.insert(cursorLine, ' ');
                     cursorLine--;
                 }
-
-                var text = input.toString().trim().replace("|", "");
-                response_book.removeAll(response_book);
-
-                List<BOOK> response = client.GET_REQUEST(
-                    "http://localhost:8080/books?title=" + text
-                );
-
-                if (text.isBlank()) {
-                    return;
-                }
-
-                response_book.addAll(response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -97,9 +137,20 @@ public class INPUT {
             input.insert(cursorLine, '|');
         }
 
+        var showText = String.join(
+            "+",
+            input.toString().replace("|", "").split(" ")
+        );
+
+        if (showText.length() >= 1) {
+            showText = showText.substring(1);
+        }
+
         String[] str = {
-            "http://localhost:8080/books?title=" +
-            input.toString().trim().replace("|", ""),
+            "https://openlibrary.org/search.json?q=" +
+            showText +
+            "  | Pesquisa: " +
+            this.pesquisar_por,
             "┌" + "─".repeat(searchBarSize) + "┐",
             "│" + input.toString() + "│",
             "└" + "─".repeat(searchBarSize) + "┘",
@@ -122,7 +173,8 @@ public class INPUT {
         }
     }
 
-    public void init(CLIENT client, List<BOOK> response_book) throws Exception {
+    public void init(CLIENT client, List<JsonNode> response_book)
+        throws Exception {
         this.handleKeyEvents(client, response_book);
         this.draw();
     }

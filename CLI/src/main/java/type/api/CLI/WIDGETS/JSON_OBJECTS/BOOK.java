@@ -5,7 +5,7 @@ public class BOOK {
     private int book_id;
     private String isbn;
     private String title;
-    private int publication_date;
+    private String publication_date;
     private String cover_image_url;
     private String authors_name;
 
@@ -23,7 +23,7 @@ public class BOOK {
         return isbn;
     }
 
-    public int getPublicationDate() {
+    public String getPublicationDate() {
         return publication_date;
     }
 
@@ -47,7 +47,7 @@ public class BOOK {
         this.isbn = isbn;
     }
 
-    public void setPublicationDate(int publication_date) {
+    public void setPublicationDate(String publication_date) {
         this.publication_date = publication_date;
     }
 

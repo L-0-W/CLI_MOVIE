@@ -1,5 +1,6 @@
 package type.api.CLI;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +8,6 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp.Capability;
 import org.jline.utils.Log;
-import type.api.CLI.WIDGETS.JSON_OBJECTS.BOOK;
 
 public class Application {
 
@@ -29,7 +29,7 @@ public class Application {
                 .setTerminal(terminal);
 
             var client = GUI.CLIENT_BUILDER();
-            List<BOOK> response_book = new ArrayList<>();
+            List<JsonNode> response_book = new ArrayList<JsonNode>();
 
             while (true) {
                 // change for - while(gui.open())
@@ -38,10 +38,16 @@ public class Application {
 
                 input.init(client, response_book);
 
-                if (!response_book.isEmpty()) {
-                    table.use_elements(response_book);
-                } else {
+                if (response_book.isEmpty()) {
+                    terminal.writer().println("Ainda NULO");
                     table.clean_elements();
+                } else {
+                    terminal.writer().println("Não e mais NULO");
+                    table.use_elements(
+                        response_book,
+                        input.pesquisar_por,
+                        input.selected
+                    );
                 }
 
                 table.init();
