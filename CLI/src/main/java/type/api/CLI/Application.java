@@ -39,10 +39,8 @@ public class Application {
                 input.init(client, response_book);
 
                 if (response_book.isEmpty()) {
-                    terminal.writer().println("Ainda NULO");
                     table.clean_elements();
                 } else {
-                    terminal.writer().println("Não e mais NULO");
                     table.use_elements(
                         response_book,
                         input.pesquisar_por,

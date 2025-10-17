@@ -17,6 +17,7 @@ public class TABLE {
     protected List<BOOK> elements_draw = new ArrayList<>();
     protected String pesquisar_por = "Frase";
     protected int selected = 0;
+    protected int books_offset = 0;
 
     public TABLE setTerminal(Terminal terminal) {
         this.terminal = terminal;
@@ -38,69 +39,163 @@ public class TABLE {
 
         for (int i = 0; i < tableHeigthSize; i++) {
             if (i == 0) {
-                str.add("┌" + "─".repeat(tableWidthSize) + "┐");
-            } else if (i == (tableHeigthSize - 1)) {
-                str.add("└" + "─".repeat(tableWidthSize) + "┘");
-            } else if (i == 1) {
-                str.add(
-                    "│" +
-                        " " +
-                        "Book Name" +
-                        " ".repeat(5) +
-                        "│" +
-                        " ".repeat(5) +
-                        "Book Id" +
-                        " ".repeat(((tableWidthSize - 1) - (20 + 7))) +
-                        "│"
-                );
+                AttributedStringBuilder color_str =
+                    new AttributedStringBuilder()
+                        .style(AttributedStyle.DEFAULT)
+                        .append("┌" + "─".repeat(tableWidthSize - 2) + "┐");
 
-                str.add("│" + "─".repeat(tableWidthSize) + "│");
+                str.add(color_str.toAnsi(terminal));
+            } else if (i == (tableHeigthSize - 1)) {
+                AttributedStringBuilder color_str =
+                    new AttributedStringBuilder()
+                        .style(AttributedStyle.DEFAULT)
+                        .append("└" + "─".repeat(tableWidthSize - 2) + "┘");
+
+                str.add(color_str.toAnsi(terminal));
+            } else if (i == 1) {
+                int ESPACAMENTO_TITULO = 10;
+                int ESPACAMENTO_AUTORES = 10;
+                int ESPACAMENTO_ISBN = 20;
+                int ESPACAMENTO_ANO_PUBLICACAO = 10;
+
+                int CAMPOS = 51;
+
+                int ESPACAMENT_NECESSARIO =
+                    ESPACAMENTO_TITULO +
+                    ESPACAMENTO_AUTORES +
+                    ESPACAMENTO_ISBN +
+                    ESPACAMENTO_ANO_PUBLICACAO +
+                    CAMPOS;
+
+                AttributedStringBuilder color_str =
+                    new AttributedStringBuilder()
+                        .style(AttributedStyle.DEFAULT)
+                        .append(
+                            "│" +
+                                " " +
+                                "Nome do Livro" +
+                                " ".repeat(ESPACAMENTO_TITULO) +
+                                "|" +
+                                " " +
+                                "Autores" +
+                                " ".repeat(ESPACAMENTO_AUTORES) +
+                                "|" +
+                                " " +
+                                "ISBN" +
+                                " ".repeat(ESPACAMENTO_ISBN) +
+                                "|" +
+                                " " +
+                                "Data de Publicação" +
+                                " ".repeat(ESPACAMENTO_ANO_PUBLICACAO) +
+                                " ".repeat(
+                                    tableWidthSize - ESPACAMENT_NECESSARIO
+                                ) +
+                                "│"
+                        );
+
+                str.add(color_str.toAnsi(terminal));
+
+                AttributedStringBuilder color_str_final =
+                    new AttributedStringBuilder()
+                        .style(AttributedStyle.DEFAULT)
+                        .append("│" + "─".repeat(tableWidthSize - 2) + "│");
+
+                str.add(color_str_final.toAnsi(terminal));
             } else if (
                 !elements_draw.isEmpty() &&
                 elements_draw.size() >= (i - 1) &&
                 elements_draw.get(0).getAuthorsName() != null
             ) {
-                var current_element = elements_draw.get(i - 2);
-                str.add(
-                    "│" +
-                        " ".repeat(5) +
-                        current_element.getTitle() +
-                        " ".repeat(5) +
-                        current_element.getBook_Id() +
-                        " ".repeat(5) +
-                        current_element.getAuthorsName() +
-                        " ".repeat(5) +
-                        current_element.getISBN() +
-                        " ".repeat(5) +
-                        current_element.getPublicationDate() +
-                        " ".repeat(5) +
-                        "│" +
-                        " ".repeat(
-                            tableWidthSize -
-                                (current_element.getTitle().length() +
-                                    current_element.getAuthorsName().length() +
-                                    current_element.getISBN().length() +
-                                    10) -
-                                31
-                        ) +
-                        "│"
-                );
+                var current_element = elements_draw.get((i - 2));
 
-                str.add("│" + "─".repeat(tableWidthSize) + "│");
+                int ESPACAMENTO_NECESSARIO =
+                    current_element.getTitle().length() +
+                    current_element.getPublicationDate().length() +
+                    current_element.getISBN().length() +
+                    current_element.getAuthorsName().length();
+
+                if (i == this.selected + 1) {
+                    AttributedStringBuilder color_str =
+                        new AttributedStringBuilder()
+                            .style(
+                                AttributedStyle.DEFAULT.bold().foreground(
+                                    AttributedStyle.BLUE
+                                )
+                            )
+                            .append(
+                                "│" +
+                                    " " +
+                                    current_element.getTitle() +
+                                    " ".repeat(5) +
+                                    "│ " +
+                                    current_element.getAuthorsName() +
+                                    " ".repeat(5) +
+                                    "│ " +
+                                    current_element.getISBN() +
+                                    " ".repeat(5) +
+                                    "│ " +
+                                    current_element.getPublicationDate() +
+                                    " ".repeat(5) +
+                                    "│" +
+                                    " ".repeat(
+                                        tableWidthSize -
+                                            (ESPACAMENTO_NECESSARIO + 30)
+                                    ) +
+                                    "│"
+                            );
+
+                    str.add(color_str.toAnsi(terminal));
+
+                    AttributedStringBuilder color_str_final =
+                        new AttributedStringBuilder()
+                            .style(AttributedStyle.DEFAULT)
+                            .append("│" + "─".repeat(tableWidthSize - 2) + "│");
+
+                    str.add(color_str_final.toAnsi(terminal));
+                } else {
+                    AttributedStringBuilder color_str =
+                        new AttributedStringBuilder()
+                            .style(AttributedStyle.DEFAULT)
+                            .append(
+                                "│" +
+                                    " " +
+                                    current_element.getTitle() +
+                                    " ".repeat(5) +
+                                    "│ " +
+                                    current_element.getAuthorsName() +
+                                    " ".repeat(5) +
+                                    "│ " +
+                                    current_element.getISBN() +
+                                    " ".repeat(5) +
+                                    "│ " +
+                                    current_element.getPublicationDate() +
+                                    " ".repeat(5) +
+                                    "│" +
+                                    " ".repeat(
+                                        tableWidthSize -
+                                            (ESPACAMENTO_NECESSARIO + 30)
+                                    ) +
+                                    "│"
+                            );
+
+                    str.add(color_str.toAnsi(terminal));
+
+                    AttributedStringBuilder color_str_final =
+                        new AttributedStringBuilder()
+                            .style(AttributedStyle.DEFAULT)
+                            .append("│" + "─".repeat(tableWidthSize - 2) + "│");
+
+                    str.add(color_str_final.toAnsi(terminal));
+                }
             } else {
-                str.add("│" + " ".repeat(tableWidthSize) + "│");
+                AttributedStringBuilder color_str_final =
+                    new AttributedStringBuilder()
+                        .style(AttributedStyle.DEFAULT)
+                        .append("│" + " ".repeat(tableWidthSize - 2) + "│");
+
+                str.add(color_str_final.toAnsi(terminal));
             }
         }
-
-        AttributedStringBuilder asb = new AttributedStringBuilder();
-
-        asb
-            .style(
-                AttributedStyle.DEFAULT.bold().foreground(AttributedStyle.BLUE)
-            )
-            .append("");
-
-        terminal.writer().println(asb.toAnsi(terminal));
 
         int index = 0;
         for (String line : str) {
@@ -111,7 +206,7 @@ public class TABLE {
                         "\033[%d;%dH%s",
                         (((terminal.getHeight() - terminal.getHeight()) + 10) +
                             index),
-                        ((terminal.getWidth() - line.length()) / 2),
+                        ((terminal.getWidth() - 162)),
                         line
                     )
                 );
@@ -151,8 +246,8 @@ public class TABLE {
         String query = books_draw.get(0).get("q").asText();
         JsonNode docs = books_draw.get(0).get("docs");
 
-        int result_size = books_draw.get(0).get("num_found").asInt() > 10
-            ? 10
+        int result_size = books_draw.get(0).get("num_found").asInt() > 30
+            ? 30
             : books_draw.get(0).get("num_found").asInt();
 
         List<BOOK> list_books_conveted = new ArrayList<BOOK>();
@@ -179,7 +274,9 @@ public class TABLE {
                 }
             }
 
-            String authorsName = docs.get(i).get("author_name").get(0).asText();
+            String authorsName = docs.get(i).has("author_name")
+                ? docs.get(i).get("author_name").get(0).asText()
+                : "Vazio";
 
             book_converted.setAuthorsName(authorsName);
             book_converted.setBook_Id(2);

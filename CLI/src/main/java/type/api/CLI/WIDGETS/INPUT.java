@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 import org.jline.utils.NonBlockingReader;
 
 public class INPUT {
@@ -14,6 +16,8 @@ public class INPUT {
     protected Terminal terminal;
     protected int charsLength = 0;
     protected int cursorLine = 1;
+
+    protected boolean api_response_ok = true;
 
     public String pesquisar_por = "Frase";
     public int selected = 0;
@@ -66,8 +70,10 @@ public class INPUT {
                         );
 
                         if (response.isPresent()) {
+                            this.api_response_ok = true;
                             response_book.add(response.get());
                         } else {
+                            this.api_response_ok = false;
                             return;
                         }
                     }
@@ -86,8 +92,11 @@ public class INPUT {
                         } else if (last == 68) {
                             this.pesquisar_por = "Frase";
                             return;
+                        } else if (last == 65) {
+                            if (this.selected > 0) this.selected -= 1;
+                            return;
                         } else if (last == 66) {
-                            this.selected++;
+                            if (this.selected > 9) this.selected += 1;
                             return;
                         }
                     }
@@ -146,13 +155,35 @@ public class INPUT {
             showText = showText.substring(1);
         }
 
+        String string_color;
+
+        if (this.api_response_ok) {
+            string_color = new AttributedStringBuilder()
+                .style(
+                    AttributedStyle.DEFAULT.bold().foreground(
+                        AttributedStyle.BLUE
+                    )
+                )
+                .append("º")
+                .toAnsi();
+        } else {
+            string_color = new AttributedStringBuilder()
+                .style(
+                    AttributedStyle.DEFAULT.bold().foreground(
+                        AttributedStyle.RED
+                    )
+                )
+                .append("º")
+                .toAnsi();
+        }
+
         String[] str = {
             "https://openlibrary.org/search.json?q=" +
             showText +
             "  | Pesquisa: " +
             this.pesquisar_por,
             "┌" + "─".repeat(searchBarSize) + "┐",
-            "│" + input.toString() + "│",
+            "│" + input.toString() + "│" + " " + string_color,
             "└" + "─".repeat(searchBarSize) + "┘",
         };
 
@@ -165,7 +196,7 @@ public class INPUT {
                         "\033[%d;%dH%s",
                         ((terminal.getHeight() - terminal.getHeight()) + 3) +
                             index,
-                        ((terminal.getWidth() - line.length()) / 2),
+                        ((terminal.getWidth() - 30) / 2),
                         line
                     )
                 );
